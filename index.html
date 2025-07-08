@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Llueve Amor</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .center-message {
+      font-family: 'Courier New', monospace;
+      color: #ff69b4;
+      font-size: 3rem;
+      text-align: center;
+      opacity: 0.5; /* Cambiado de 0.1 a 0.5 para mayor visibilidad */
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="canvas"></canvas>
+
+  <div class="overlay">
+    <div class="center-message">TE AMO💖</div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Configurar tamaño del canvas
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const text = "TE AMO";
+    const fontSize = 16;
+    const columns = Math.floor(canvas.width / (fontSize * 4)); // Menos columnas porque "TE AMO" es más ancho
+    const drops = new Array(columns).fill(1);
+
+    let particles = []; // Para las explosiones
+
+    ctx.font = fontSize + "px monospace";
+
+    // Clase para partículas de explosión
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.text = "¡Te amo!";
+        this.size = Math.random() * 20 + 10;
+        this.speedX = Math.random() * 6 - 3; // Movimiento horizontal aleatorio
+        this.speedY = Math.random() * 6 - 3; // Movimiento vertical aleatorio
+        this.opacity = 1;
+        this.color = '#ff69b4'; // Rosa para las explosiones
+      }
+
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.opacity -= 0.03; // Desvanecimiento
+      }
+
+      draw() {
+        ctx.font = `${this.size}px monospace`;
+        ctx.fillStyle = `rgba(255, 105, 180, ${this.opacity})`; // Rosa con opacidad
+        ctx.fillText(this.text, this.x, this.y);
+      }
+    }
+
+    // Función para crear explosión
+    function createExplosion(x, y) {
+      for (let i = 0; i < 40; i++) { // 40 partículas por explosión
+        particles.push(new Particle(x, y));
+      }
+    }
+
+    // Función de dibujo
+    function draw() {
+      // Fondo translúcido para efecto de desvanecimiento de la lluvia
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Dibujar la lluvia
+      ctx.fillStyle = "#ff69b4"; // Rosado amoroso
+      for (let i = 0; i < drops.length; i++) {
+        const x = i * fontSize * 4;
+        const y = drops[i] * fontSize;
+        ctx.fillText(text, x, y);
+
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+
+      // Dibujar y actualizar partículas de explosión
+      particles = particles.filter(p => p.opacity > 0);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+    }
+
+    // Animación
+    setInterval(draw, 50);
+
+    // Detectar toques o clics para explosiones
+    canvas.addEventListener('click', (e) => {
+      createExplosion(e.clientX, e.clientY);
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      createExplosion(touch.clientX, touch.clientY);
+    });
+
+    // Redimensionar canvas si cambia el tamaño
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+
+</body>
+</html>
